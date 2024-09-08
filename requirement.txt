@@ -1,0 +1,1 @@
+pip install langchain_openai langchain_text_splitters langchain_openai langchain_experimental streamlit pathlib python-dotenv neo4j pypdf
