@@ -110,15 +110,23 @@ def generate_full_text_query(input: str) -> str:
     full_text_query += f" {words[-1]}~2"
     return full_text_query.strip()
 
-def retrive_all_node_for_entity_in_question(question, entity_chain) -> str:
+def retrive_all_node_for_entity_in_question(question, entity_chain, with_kw, with_vector_search) -> str:
     print('===enter====')
     """
     Collects the neighborhood of entities mentioned
     in the question
     """
     result = ""
+    structured = ''
+    unstructured = ''
     entities = entity_chain.invoke({"question": question});
-    result = (search_on_node(entities.names),checking(entities.names))
+
+
+    if(with_kw):
+        structured = search_on_node(entities.names)
+    if(with_vector_search):
+        unstructured = checking(entities.names)
+    result = (structured,unstructured)
     print('exit')
     return result
 
@@ -179,14 +187,13 @@ RETURN output LIMIT 10
 
 
 
-def perform_search_on_kw_and_vector(question, withkw):
+def perform_search_on_kw_and_vector(question, withkw, with_vector_search):
     entity_extraction_chain = get_chain_to_extract_entity(question)
     def inner(question):
-      (structured_data,unstrucured_data)  = retrive_all_node_for_entity_in_question(question, entity_extraction_chain)
+      (structured_data,unstrucured_data)  = retrive_all_node_for_entity_in_question(question, entity_extraction_chain, withkw, with_vector_search)
       unstrucured_data_context= "".join(getunstructuredData(question))
 
-      if(withkw == False):
-         structured_data = ''
+      
       final_data = f"""Structured data:
          {structured_data}
 
@@ -203,7 +210,7 @@ def perform_search_on_kw_and_vector(question, withkw):
     return inner
 
 
-def get_answer(question, withKw):
+def get_answer(question, withKw, withVectorSearch):
     _search_query =  RunnableLambda(lambda x: x["question"])
 
     template = """You are an assistant for question-answering tasks. Use the following pieces of retrieved context to answer the question. If you don't know the answer, just say that you don't know. Use three sentences maximum and keep the answer concise. 
@@ -219,7 +226,7 @@ Answer:
     chain = (
     RunnableParallel(
         {
-            "context": _search_query | perform_search_on_kw_and_vector(question, withKw),
+            "context": _search_query | perform_search_on_kw_and_vector(question, withKw, withVectorSearch),
             "question": RunnablePassthrough(),
         }
     )|prompt| llm
