@@ -33,10 +33,11 @@ if uploaded_file is not None:
 
 # Input for user query
 query = st.text_input("Ask a question:")
-
+checkbox_state = st.checkbox('with knowledge graph')
+print(checkbox_state)
 # # Process the query and respond based on file content
 if st.button("Submit"):
-    answer = get_answer(query)
+    answer = get_answer(query, checkbox_state)
     st.session_state.messages.append((query, answer))
 for query, response in st.session_state.messages:
         st.write(f"**You:** {query}")

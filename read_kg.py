@@ -179,11 +179,14 @@ RETURN output LIMIT 10
 
 
 
-def perform_search_on_kw_and_vector(question):
+def perform_search_on_kw_and_vector(question, withkw):
     entity_extraction_chain = get_chain_to_extract_entity(question)
     def inner(question):
       (structured_data,unstrucured_data)  = retrive_all_node_for_entity_in_question(question, entity_extraction_chain)
       unstrucured_data_context= "".join(getunstructuredData(question))
+
+      if(withkw == False):
+         structured_data = ''
       final_data = f"""Structured data:
          {structured_data}
 
@@ -200,7 +203,7 @@ def perform_search_on_kw_and_vector(question):
     return inner
 
 
-def get_answer(question):
+def get_answer(question, withKw):
     _search_query =  RunnableLambda(lambda x: x["question"])
 
     template = """You are an assistant for question-answering tasks. Use the following pieces of retrieved context to answer the question. If you don't know the answer, just say that you don't know. Use three sentences maximum and keep the answer concise. 
@@ -216,7 +219,7 @@ Answer:
     chain = (
     RunnableParallel(
         {
-            "context": _search_query | perform_search_on_kw_and_vector(question),
+            "context": _search_query | perform_search_on_kw_and_vector(question, withKw),
             "question": RunnablePassthrough(),
         }
     )|prompt| llm
