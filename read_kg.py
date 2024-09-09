@@ -81,7 +81,7 @@ def get_chain_to_extract_entity(question):
         [
             (
              "system",
-                """ you are extractive Entity Information Source, Factor, Contact, Person and Concept""",
+                """ you are extracting Entity Information Source, Factor, Contact, Person and Concept""",
             ),
             (
                 "human",

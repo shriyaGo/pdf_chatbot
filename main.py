@@ -20,7 +20,7 @@ if "messages" not in st.session_state:
     st.session_state.messages = []
 
 # Display chat interface
-st.title("Chat Interface")
+st.title("Pdf chatbot")
 st.write("Ask questions based on the uploaded file content")
 
 # File reading and displaying
